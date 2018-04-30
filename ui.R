@@ -275,9 +275,8 @@ ui <- dashboardPage(
                             choices = c('CHF_Etiology','Race','Race_CHF_Etiology','Gender','Afib','Diabetes','Hypertension'), selected = 'CHF_Etiology'),
                 selectInput("splitby", label = h3("Split By"), 
                             choices = c('CHF_Etiology','Race','Race_CHF_Etiology','Gender','Afib','Diabetes','Hypertension'), selected = 'Race_CHF_Etiology'),
-                
                 selectInput("colorpal", label = h3("Colour Palette"), 
-                            choices = listpalettes(), selected = 'aaas'),
+                            choices = c("aaas",'npg','nejm','lancet','jama','jco','d3','simpsons'), selected = 'aaas'),
                 radioButtons("imagetype", label = h3("Image Type"),
                              choices = list("PNG" = 'png', "PDF" = 'pdf'), 
                              selected = 'png'),

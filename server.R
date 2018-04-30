@@ -30,6 +30,7 @@ library(limma)
 library(ggrepel)
 library(readxl)
 library(biomaRt)
+library(readr)
 
 
 #Create a theme for all plots.
@@ -2120,10 +2121,39 @@ server <- function(input, output) {
   })
   
   output$eSNP_plot <- renderPlot({
+    results=fileload()
     s<-getData()[input$eQTLTable_rows_selected,]
     snpid<-paste0(s$chrom[1],':',s$st[1])
     #snpid<-'1:1217011'
     gene=s$gene_id[1]
+    vcffile = "data/MAGnet_allgood_finallist_maf5.vcf.gz"
+    #d <- read.csv('data/Voom_Matrix.csv')
+    d=as.data.frame(exprs(results$eset))
+    pheno <- read_csv('data/MAGnet_phenotypes.csv') %>% rename(sampleid=Sample) %>% mutate(Race_CHF_Etiology=paste0(Race,'_',CHF_Etiology))
+    
+    eSNP_plot <- function(snp,gene,marker_size=0.1,colorpal='aaas',xvar='Genotype',colorby='CHF_Etiology',splitby='Race_CHF_Etiology'){
+      palstr <- paste0("ggsci::scale_color_",colorpal, "()")
+      geno <- read_csv(pipe(paste0("bcftools query -r ",snp,"  -f '[%SAMPLE,%ID,%REF,%ALT{0},%INFO/AF,%TGT,%DS\n]' ", vcffile)),
+                       col_names=c('sampleid','snpid','ref','alt','AF','Genotype','Dosage'),
+                       col_types='ccccncn')
+      geno <- inner_join(geno,pheno) %>% arrange(sampleid)
+      geno$signal <- d[gene,]
+      
+      p <- geno %>% filter(CHF_Etiology %in% c('NF',"DCM")) %>% 
+        ggplot(aes_(x=as.name(xvar),y=~signal,color=as.name(colorby))) 
+      if(xvar=='Dosage'){
+        p <- p + geom_point() + geom_smooth(method = 'lm') + xlab('Alt Allele Dosage')
+        
+      }else{
+        p <- p + geom_point(position=position_jitterdodge(dodge.width=0.9)) + 
+          geom_boxplot(alpha=0,outlier.colour = NA, position = position_dodge(width=0.9)) +
+          xlab('Phased Genotype')
+      }
+      p <- p + ylab('Adjusted CPM') + 
+        facet_wrap(as.formula(paste("~", splitby)),nrow=1) + 
+        theme_opts() + eval(parse(text = palstr))
+      return(p)
+    }
     eSNP_plot(snpid,gene,marker_size = input$pointsize, colorby=input$colorby,colorpal=input$colorpal,xvar=input$xvar,splitby=input$splitby)
   })
   
