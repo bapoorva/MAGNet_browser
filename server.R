@@ -224,15 +224,21 @@ server <- function(input, output) {
     v = results$eset
     keepGenes <- v@featureData@data
     #keepGenes <- v@featureData@data %>% filter(!(seq_name %in% c('X','Y')) & !(is.na(SYMBOL)))
-    pData<-phenoData(v)
-    v.filter = v[rownames(v@assayData$exprs) %in% rownames(keepGenes),]
-    Pvars <- apply(exprs(v.filter),1,var)
+    fData<-fData(v)
+    v.filter=results$fpkm
+    #v.filter = v[rownames(v@assayData$exprs) %in% rownames(keepGenes),]
+    #Pvars <- apply(exprs(v.filter),1,var)
+    Pvars <- apply(v.filter,1,var)
     select <- order(Pvars, decreasing = TRUE)[seq_len(min(n,length(Pvars)))]
-    v.var <-v.filter[select,]
-    m<-exprs(v.var)
-    rownames(m) <- v.var@featureData@data$SYMBOL
+    m <-v.filter[select,]
+    #m<-exprs(v.var)
     m=as.data.frame(m)
     m=unique(m)
+    m$ENSEMBL=rownames(m)
+    m= left_join(m,fData,by="ENSEMBL")
+    rownames(m)=m$SYMBOL
+    m=m %>% dplyr::select(-ENSEMBL:-geneloc)
+    
     res.pca = PCA(t(m), graph = FALSE)
   })
   
@@ -703,7 +709,8 @@ server <- function(input, output) {
     eset <- results$eset
     pData=pData(eset) #get pheno-data
     minexpr=pData$minexpr[1]
-    e <-data.frame(eset@phenoData@data,signal=exprs(eset)[id,])
+    #e <-data.frame(eset@phenoData@data,signal=exprs(eset)[id,])
+    e <-data.frame(eset@phenoData@data,signal=results$fpkm[id,])
     if(is.na(dt1$SYMBOL)) #if gene symbol does not exist,use ENSEMBL id
     {genesymbol=dt1$ENSEMBL}
     else{
@@ -2129,7 +2136,8 @@ server <- function(input, output) {
     vcffile = "data/MAGnet_allgood_finallist_maf5.vcf.gz"
     #d <- read.csv('data/Voom_Matrix.csv')
     d=as.data.frame(exprs(results$eset))
-    pheno <- read_csv('data/MAGnet_phenotypes.csv') %>% rename('Sample'='sampleid') %>% mutate(Race_CHF_Etiology=paste0(Race,'_',CHF_Etiology))
+    #pheno <- read_csv('data/MAGnet_phenotypes.csv') %>% rename('Sample'='sampleid') %>% mutate(Race_CHF_Etiology=paste0(Race,'_',CHF_Etiology))
+    pheno <- read_csv('data/MAGnet_phenotypes.csv') %>% rename(sampleid=Sample) %>% mutate(Race_CHF_Etiology=paste0(Race,'_',CHF_Etiology))
     
     eSNP_plot <- function(snp,gene,marker_size=0.1,colorpal='aaas',xvar='Genotype',colorby='CHF_Etiology',splitby='Race_CHF_Etiology'){
       palstr <- paste0("ggsci::scale_color_",colorpal, "()")
@@ -2137,7 +2145,7 @@ server <- function(input, output) {
                        col_names=c('sampleid','snpid','ref','alt','AF','Genotype','Dosage'),
                        col_types='ccccncn')
       geno <- inner_join(geno,pheno) %>% arrange(sampleid)
-      geno$signal <- d[gene,]
+      geno$signal <- t(d[gene,])
       
       p <- geno %>% filter(CHF_Etiology %in% c('NF',"DCM")) %>% 
         ggplot(aes_(x=as.name(xvar),y=~signal,color=as.name(colorby))) 
@@ -2172,38 +2180,7 @@ server <- function(input, output) {
   ###################################################
   ###################################################
   output$eSNPlookupPlot <- renderPlot({
-    results=fileload()
-    snpid<-input$snpid
-    gene=s$gene_id[1]
-    vcffile = "data/MAGnet_allgood_finallist_maf5.vcf.gz"
-    #d <- read.csv('data/Voom_Matrix.csv')
-    d=as.data.frame(exprs(results$eset))
-    pheno <- read_csv('data/MAGnet_phenotypes.csv') %>% rename('Sample'='sampleid') %>% mutate(Race_CHF_Etiology=paste0(Race,'_',CHF_Etiology))
     
-    eSNP_plot <- function(snp,gene,marker_size=0.1,colorpal='aaas',xvar='Genotype',colorby='CHF_Etiology',splitby='Race_CHF_Etiology'){
-      palstr <- paste0("ggsci::scale_color_",colorpal, "()")
-      geno <- read_csv(pipe(paste0("bcftools query -r ",snp,"  -f '[%SAMPLE,%ID,%REF,%ALT{0},%INFO/AF,%TGT,%DS\n]' ", vcffile)),
-                       col_names=c('sampleid','snpid','ref','alt','AF','Genotype','Dosage'),
-                       col_types='ccccncn')
-      geno <- inner_join(geno,pheno) %>% arrange(sampleid)
-      geno$signal <- d[gene,]
-      
-      p <- geno %>% filter(CHF_Etiology %in% c('NF',"DCM")) %>% 
-        ggplot(aes_(x=as.name(xvar),y=~signal,color=as.name(colorby))) 
-      if(xvar=='Dosage'){
-        p <- p + geom_point() + geom_smooth(method = 'lm') + xlab('Alt Allele Dosage')
-        
-      }else{
-        p <- p + geom_point(position=position_jitterdodge(dodge.width=0.9)) + 
-          geom_boxplot(alpha=0,outlier.colour = NA, position = position_dodge(width=0.9)) +
-          xlab('Phased Genotype')
-      }
-      p <- p + ylab('Adjusted CPM') + 
-        facet_wrap(as.formula(paste("~", splitby)),nrow=1) + 
-        theme_opts() + eval(parse(text = palstr))
-      return(p)
-    }
-    eSNP_plot(snpid,gene,marker_size = input$pointsize, colorby=input$colorby,colorpal=input$colorpal,xvar=input$xvar,splitby=input$splitby)
   })
   
   output$download_eSNPlookupPlot <- downloadHandler(
@@ -2226,6 +2203,7 @@ server <- function(input, output) {
     validate(
       need(input$genedeg, "Enter valid Gene Symbol")
     )
+    eset=results$eset
     fData=fData(eset)
     ensembl=fData$ENSEMBL[fData$SYMBOL==geneid]
     eset <- results$eset
