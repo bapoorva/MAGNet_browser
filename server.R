@@ -2128,8 +2128,24 @@ server <- function(input, output) {
   ############### eSNP lookup #######################
   ###################################################
   ###################################################
-  output$eSNPlookupPlot <- renderPlot({
+  output$snplookup_plot <- renderPlot({
+    results=fileload()
+    attr=getBM(attributes = c('refsnp_id','chrom_start','chrom_strand'),filters  = 'snp_filter',values = input$snpid, mart = snpmart)
+    snp=paste0(attr$chrom_strand,":",attr$chrom_start,sep="")
+    geneid=input$geneid
+    validate(
+      need(input$snpid, "Enter valid snp id")
+    )
+    validate(
+      need(input$geneid, "Enter valid Gene Symbol")
+    )
+    eset=results$eset
+    fData=fData(eset)
+    gene=fData$ENSEMBL[fData$SYMBOL==geneid]
     
+    eSNP_plot(results$eset,snp,gene,results$fpkm,marker_size = input$pointsize, colorby=input$colorbyesnp,
+              colorpal=input$colorpalesnp,
+              xvar=input$xvaresnp,splitby=input$splitbyesnp)
   })
   
   output$download_eSNPlookupPlot <- downloadHandler(
@@ -2138,7 +2154,7 @@ server <- function(input, output) {
     },
     content = function(file){
       jpeg(file, quality = 100, width = 800, height = 800)
-      plot(eSNPlookupPlot())
+      plot(snplookup_plot())
       dev.off()
     })
   ###################################################

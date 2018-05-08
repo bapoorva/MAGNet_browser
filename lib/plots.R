@@ -6,7 +6,7 @@ library('ggplot2')
 #                                                                           #
 #############################################################################
 vcffile = "data/MAGnet_allgood_finallist.vcf.gz"
-
+snpmart = useMart(biomart = "ENSEMBL_MART_SNP", dataset="hsapiens_snp")
 plotTheme <-theme_bw() + theme(axis.title.x = element_text(face="bold", size=12),
                                axis.text.x  = element_text(angle=35, vjust=0.5, size=12),
                                axis.title.y = element_text(face="bold", size=12),

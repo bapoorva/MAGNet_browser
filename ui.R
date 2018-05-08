@@ -289,6 +289,8 @@ ui <- dashboardPage(
               box(
                 title = "Controls",solidHeader = TRUE,width=4,status='primary',
                 textInput("snpid", label="Enter rsid of the snp", value = ""),
+                textInput("geneid", label="Enter Gene", value = ""),
+                selectInput("xvaresnp", label = h3("Genotype Variable"), choices = c('Genotype','Dosage'), selected = 'Genotype'),
                 selectInput("colorbyesnp", label ="Color By", 
                             choices = c('etiology','race','race_etiology','gender','afib','diabetes','hypertension'), selected = 'etiology'),
                 selectInput("splitbyesnp", label = "Split By", 
