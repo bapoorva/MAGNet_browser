@@ -52,7 +52,7 @@ eSNP_plot <- function(eset,snp,gene,marker_size=0.1,colorpal='aaas',xvar='Genoty
   
   
   geno$signal <-as.vector(t(exprs(eset)[gene,]))
-  sig=exprs(eset)
+  sig=results$fpkm
   sig=sig[rownames(sig)==gene,]
   geno$signal <-as.vector(t(sig))
   #geno$signal <-as.vector(t(exprs(eset)[rownames(exprs(eset))==gene,]))

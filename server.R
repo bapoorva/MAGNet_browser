@@ -2157,10 +2157,10 @@ server <- function(input, output) {
     ensembl=fData$ENSEMBL[fData$SYMBOL==geneid]
     eset <- results$eset
     eset@phenoData@data <- eset@phenoData@data %>% mutate(Race_CHF_Etiology=paste0(race,'_',etiology))
-    e <-data.frame(eset@phenoData@data,signal=exprs(eset)[ensembl,])
+    e <-data.frame(eset@phenoData@data,signal=results$fpkm[rownames(results$fpkm)==ensembl,])
 
     gg=ggplot(e,aes_string(x=input$splitbydeg,y="signal",col=input$colorbydeg))+plotTheme+guides(color=guide_legend(title=as.character(input$splitbydeg)))+
-        labs(title=input$genedeg, x="Condition", y="Expression Value") + geom_point(size=5,position=position_jitter(w = 0.1))+ geom_smooth(method=lm,se=FALSE) +
+        labs(title=input$genedeg, x="Condition", y="Adjusted FPKM") + geom_point(size=5,position=position_jitter(w = 0.1))+ geom_smooth(method=lm,se=FALSE) +
         stat_summary(fun.y = "mean", fun.ymin = "mean", fun.ymax= "mean", size= 0.3, geom = "crossbar",width=.2)
 
     gg
