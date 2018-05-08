@@ -39,7 +39,7 @@ theme_opts <- function()
 #############################################################################
 
 
-eSNP_plot <- function(eset,snp,gene,marker_size=0.1,colorpal='aaas',xvar='Genotype',colorby='etiology',splitby='race_etiology'){
+eSNP_plot <- function(eset,snp,gene,fpkm,marker_size=0.1,colorpal='aaas',xvar='Genotype',colorby='etiology',splitby='race_etiology'){
   #snp='17:64320085'
   #gene='ENSG00000154229'
   palstr <- paste0("ggsci::scale_color_",colorpal, "()")
@@ -52,7 +52,7 @@ eSNP_plot <- function(eset,snp,gene,marker_size=0.1,colorpal='aaas',xvar='Genoty
   
   
   geno$signal <-as.vector(t(exprs(eset)[gene,]))
-  sig=results$fpkm
+  sig=fpkm
   sig=sig[rownames(sig)==gene,]
   geno$signal <-as.vector(t(sig))
   #geno$signal <-as.vector(t(exprs(eset)[rownames(exprs(eset))==gene,]))

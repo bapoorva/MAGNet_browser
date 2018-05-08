@@ -2109,7 +2109,7 @@ server <- function(input, output) {
     #gene='ENSG00000225880'
     
     
-    eSNP_plot(results$eset,snp,gene,marker_size = input$pointsize, colorby=input$colorby,
+    eSNP_plot(results$eset,snp,gene,results$fpkm,marker_size = input$pointsize, colorby=input$colorby,
               colorpal=input$colorpal,
               xvar=input$xvar,splitby=input$splitby)
   })
