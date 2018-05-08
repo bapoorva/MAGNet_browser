@@ -7,6 +7,10 @@ library('ggplot2')
 #############################################################################
 vcffile = "data/MAGnet_allgood_finallist.vcf.gz"
 
+plotTheme <-theme_bw() + theme(axis.title.x = element_text(face="bold", size=12),
+                               axis.text.x  = element_text(angle=35, vjust=0.5, size=12),
+                               axis.title.y = element_text(face="bold", size=12),
+                               axis.text.y  = element_text(angle=0, vjust=0.5, size=12))
 
 listpalettes <-  function(){
   return( c("aaas",'npg','nejm','lancet','jama','jco','d3','simpsons'))
