@@ -31,34 +31,7 @@ library(ggrepel)
 library(readxl)
 library(biomaRt)
 library(readr)
-
-
-#Create a theme for all plots.
-plotTheme <-theme_bw() + theme(axis.title.x = element_text(face="bold", size=12),
-                               axis.text.x  = element_text(angle=35, vjust=0.5, size=12),
-                               axis.title.y = element_text(face="bold", size=12),
-                               axis.text.y  = element_text(angle=0, vjust=0.5, size=12))
-
-listpalettes <-  function(){
-  return( c("aaas",'npg','nejm','lancet','jama','jco','d3','simpsons'))
-}
-
-theme_opts <- function()
-{
-  theme(strip.background = element_rect(colour = 'white', fill = 'white')) +
-    theme(panel.border = element_blank()) +
-    theme(axis.line.x = element_line(size=0.25, color="black")) +
-    theme(axis.line.y = element_line(size=0.25, color="black")) +
-    theme(panel.grid.minor.x = element_blank(), panel.grid.minor.y = element_blank()) +
-    theme(panel.grid.major.x = element_blank(), panel.grid.major.y = element_blank()) + 
-    theme(panel.background = element_rect(fill='white')) +
-    theme(legend.position="bottom") +
-    theme(legend.title=element_blank()) +
-    theme(legend.text=element_text(size=14))
-  
-  
-  
-}
+source('lib/plots.R')
 
 server <- function(input, output) {
   
@@ -2130,39 +2103,15 @@ server <- function(input, output) {
   output$eSNP_plot <- renderPlot({
     results=fileload()
     s<-getData()[input$eQTLTable_rows_selected,]
-    snpid<-paste0(s$chrom[1],':',s$st[1])
-    #snpid<-'1:1217011'
+    snp<-paste0(s$chrom[1],':',s$st[1])
     gene=s$gene_id[1]
-    vcffile = "data/MAGnet_allgood_finallist_maf5.vcf.gz"
-    #d <- read.csv('data/Voom_Matrix.csv')
-    d=as.data.frame(exprs(results$eset))
-    #pheno <- read_csv('data/MAGnet_phenotypes.csv') %>% rename('Sample'='sampleid') %>% mutate(Race_CHF_Etiology=paste0(Race,'_',CHF_Etiology))
-    pheno <- read_csv('data/MAGnet_phenotypes.csv') %>% rename(sampleid=Sample) %>% mutate(Race_CHF_Etiology=paste0(Race,'_',CHF_Etiology))
+    #snp='1:729679'
+    #gene='ENSG00000225880'
     
-    eSNP_plot <- function(snp,gene,marker_size=0.1,colorpal='aaas',xvar='Genotype',colorby='CHF_Etiology',splitby='Race_CHF_Etiology'){
-      palstr <- paste0("ggsci::scale_color_",colorpal, "()")
-      geno <- read_csv(pipe(paste0("bcftools query -r ",snp,"  -f '[%SAMPLE,%ID,%REF,%ALT{0},%INFO/AF,%TGT,%DS\n]' ", vcffile)),
-                       col_names=c('sampleid','snpid','ref','alt','AF','Genotype','Dosage'),
-                       col_types='ccccncn')
-      geno <- inner_join(geno,pheno) %>% arrange(sampleid)
-      geno$signal <- t(d[gene,])
-      
-      p <- geno %>% filter(CHF_Etiology %in% c('NF',"DCM")) %>% 
-        ggplot(aes_(x=as.name(xvar),y=~signal,color=as.name(colorby))) 
-      if(xvar=='Dosage'){
-        p <- p + geom_point() + geom_smooth(method = 'lm') + xlab('Alt Allele Dosage')
-        
-      }else{
-        p <- p + geom_point(position=position_jitterdodge(dodge.width=0.9)) + 
-          geom_boxplot(alpha=0,outlier.colour = NA, position = position_dodge(width=0.9)) +
-          xlab('Phased Genotype')
-      }
-      p <- p + ylab('Adjusted CPM') + 
-        facet_wrap(as.formula(paste("~", splitby)),nrow=1) + 
-        theme_opts() + eval(parse(text = palstr))
-      return(p)
-    }
-    eSNP_plot(snpid,gene,marker_size = input$pointsize, colorby=input$colorby,colorpal=input$colorpal,xvar=input$xvar,splitby=input$splitby)
+    
+    eSNP_plot(results$eset,snp,gene,marker_size = input$pointsize, colorby=input$colorby,
+              colorpal=input$colorpal,
+              xvar=input$xvar,splitby=input$splitby)
   })
   
   output$download_eSNP_Plot <- downloadHandler(
