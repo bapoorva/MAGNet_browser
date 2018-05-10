@@ -33,7 +33,7 @@ library(biomaRt)
 library(readr)
 source('lib/plots.R')
 
-server <- function(input, output) {
+server <- function(input, output,session) {
   
   
   ###################################################
@@ -2129,9 +2129,14 @@ server <- function(input, output) {
   ###################################################
   ###################################################
   output$snplookup_plot <- renderPlot({
+    withProgress(session = session, message = 'Generating...',detail = 'Please Wait...',{
     results=fileload()
-    attr=getBM(attributes = c('refsnp_id','chrom_start','chrom_strand'),filters  = 'snp_filter',values = input$snpid, mart = snpmart)
-    snp=paste0(attr$chrom_strand,":",attr$chrom_start,sep="")
+    # snpmart = useMart(biomart = "ENSEMBL_MART_SNP", dataset="hsapiens_snp")
+    # attr=getBM(attributes = c('refsnp_id','chrom_start','chrom_strand'),filters  = 'snp_filter',values = input$snpid, mart = snpmart)
+    # snp=paste0(attr$chrom_strand,":",attr$chrom_start,sep="")
+    snpid=input$snpid
+    t=snpid2loc(snps,snpid)
+    snp=paste(gsub("ch","",names(t)),":",t,sep="")
     geneid=input$geneid
     validate(
       need(input$snpid, "Enter valid snp id")
@@ -2146,6 +2151,7 @@ server <- function(input, output) {
     eSNP_plot(results$eset,snp,gene,results$fpkm,marker_size = input$pointsize, colorby=input$colorbyesnp,
               colorpal=input$colorpalesnp,
               xvar=input$xvaresnp,splitby=input$splitbyesnp)
+    })
   })
   
   output$download_eSNPlookupPlot <- downloadHandler(

@@ -9,7 +9,7 @@ library(rglwidget)
 library(SPIA)
 
 ui <- dashboardPage(
-  dashboardHeader(title = "NGS Data Analysis Web Interface",titleWidth = 350),
+  dashboardHeader(title = "Magnet",titleWidth = 350),
   dashboardSidebar(width = 350,
                    div(style="overflow-y: scroll"),
                    tags$head(tags$style(HTML(".sidebar { height: 170vh; overflow-y: auto; }" ))),

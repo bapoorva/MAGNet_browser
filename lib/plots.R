@@ -1,12 +1,13 @@
 library(dplyr)
 library(readr)
 library('ggplot2')
+library(SNPlocs.Hsapiens.dbSNP144.GRCh37)
 #############################################################################
 #                         Global vars                                       #   
 #                                                                           #
 #############################################################################
 vcffile = "data/MAGnet_allgood_finallist.vcf.gz"
-snpmart = useMart(biomart = "ENSEMBL_MART_SNP", dataset="hsapiens_snp")
+snplocs=SNPlocs.Hsapiens.dbSNP144.GRCh37
 plotTheme <-theme_bw() + theme(axis.title.x = element_text(face="bold", size=12),
                                axis.text.x  = element_text(angle=35, vjust=0.5, size=12),
                                axis.title.y = element_text(face="bold", size=12),
