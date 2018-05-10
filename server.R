@@ -2131,19 +2131,20 @@ server <- function(input, output,session) {
   output$snplookup_plot <- renderPlot({
     withProgress(session = session, message = 'Generating...',detail = 'Please Wait...',{
     results=fileload()
-    # snpmart = useMart(biomart = "ENSEMBL_MART_SNP", dataset="hsapiens_snp")
-    # attr=getBM(attributes = c('refsnp_id','chrom_start','chrom_strand'),filters  = 'snp_filter',values = input$snpid, mart = snpmart)
-    # snp=paste0(attr$chrom_strand,":",attr$chrom_start,sep="")
-    snpid=input$snpid
-    t=snpid2loc(snps,snpid)
-    snp=paste(gsub("ch","",names(t)),":",t,sep="")
-    geneid=input$geneid
     validate(
       need(input$snpid, "Enter valid snp id")
     )
     validate(
       need(input$geneid, "Enter valid Gene Symbol")
     )
+    # snpmart = useMart(biomart = "ENSEMBL_MART_SNP", dataset="hsapiens_snp")
+    # attr=getBM(attributes = c('refsnp_id','chrom_start','chrom_strand'),filters  = 'snp_filter',values = input$snpid, mart = snpmart)
+    # snp=paste0(attr$chrom_strand,":",attr$chrom_start,sep="")
+    snpid=input$snpid
+    t=snpsById(snps,snpid)
+    snp=paste(t$seqnames,":",t$pos,sep="")
+    geneid=input$geneid
+
     eset=results$eset
     fData=fData(eset)
     gene=fData$ENSEMBL[fData$SYMBOL==geneid]
