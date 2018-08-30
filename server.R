@@ -2189,6 +2189,33 @@ server <- function(input, output,session) {
     gg
   })
   
+  geneexp_table <- reactive({
+    validate(
+      need(input$genedeg, "Enter valid Gene Symbol")
+    )
+    results=fileload()
+    pd=pData(results$eset)
+    fd=fData(results$eset)
+    gene=fd$ENSEMBL[fd$SYMBOL==input$genedeg]
+    pd= pd %>% dplyr::select(-minexpr)
+    exp=as.data.frame(results$eset@assayData$exprs)
+    exp=exp[rownames(exp)==gene,]
+    exp=as.data.frame(t(exp))
+    colnames(exp)=input$genedeg
+    exp$sample_name=rownames(exp)
+    pd=left_join(pd,exp,by="sample_name")
+    return(pd)
+  })
+  
+  output$geneexp_table = DT::renderDataTable({
+    DT::datatable(geneexp_table(),
+                  extensions = 'Buttons', options = list(
+                    dom = 'Bfrtip',
+                    buttons = list()),
+                  rownames=FALSE,selection = list(mode = 'single', selected =1),escape=FALSE)
+  })
+  
+  
   output$geneexp_plot = renderPlot({
     genedeg()
   })

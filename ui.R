@@ -304,7 +304,7 @@ ui <- dashboardPage(
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
       tabItem(tabName = "diffexpression",
               # fluidRow(
-              box(plotOutput("geneexp_plot", height = 600),width=8,solidHeader = TRUE),
+              box(plotOutput("geneexp_plot", height = 600),width=8,solidHeader = TRUE,status='primary',title = "Gene Expression plot"),
               box(
                 title = "Controls",solidHeader = TRUE,width=4,status='primary',
                 textInput("genedeg", label="Enter Gene id", value = ""),
@@ -313,6 +313,10 @@ ui <- dashboardPage(
                 selectInput("splitbydeg", label = "Split By", 
                             choices = c('etiology','race','Race_CHF_Etiology','gender','Afib','Diabetes','Hypertension'), selected = 'Race_CHF_Etiology'),
                 downloadButton('download_genedeg', 'Download')
+              ),
+              box(
+                title = "GENE EXPRESSION TABLE",solidHeader = TRUE,width=12,status='primary',
+                DT::dataTableOutput('geneexp_table')
               )
       )
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
