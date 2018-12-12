@@ -214,7 +214,7 @@ server <- function(input, output,session) {
     m$ENSEMBL=rownames(m)
     m= left_join(m,fData,by="ENSEMBL")
     rownames(m)=make.names(m$SYMBOL,unique=T)
-    m=m %>% dplyr::select(-ENSEMBL:-geneloc)
+    m=m %>% dplyr::select(colnames(v.filter))
     
     res.pca = PCA(t(m), graph = FALSE)
   })
