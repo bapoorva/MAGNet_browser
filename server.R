@@ -106,7 +106,11 @@ server <- function(input, output,session) {
   })
   
   output$habbilage <- renderUI({
-    selectInput("habbilage","Select color by options for PCA plot",c("tissue_source","etiology","gender","race","maineffect"),selected="maineffect")
+      results=fileload()
+      pd=pData(results$eset)
+      metadata=pd %>% dplyr::select(starts_with("var_"))
+      var=c(colnames(metadata),"maineffect")
+      selectInput("habbilage","Select color by options for PCA plot",var,selected="maineffect")
   })
   
   output$biplottitle <- renderText({
@@ -589,13 +593,13 @@ server <- function(input, output,session) {
   #load voom data from eset
   datasetInput3 = reactive({
     results=fileload()
-    exprsdata=exprs(results$eset)
+    exprsdata=results$eset@assayData$exprs
   })
   
   #annotate voom data using featuresdata 
   datasetInput33 = reactive({
     results=fileload()
-    exprsdata=as.data.frame(exprs(results$eset))
+    exprsdata=as.data.frame(results$eset@assayData$exprs)
     features=as.data.frame(pData(featureData(results$eset)))
     features$id=rownames(features)
     exprsdata$id=rownames(exprsdata)
@@ -660,7 +664,23 @@ server <- function(input, output,session) {
   ##################### DOT PLOT ####################
   ###################################################
   ###################################################
-  #create user interface for dot-plot drop down menu
+  output$color = renderUI({
+    results=fileload()
+    pd=pData(results$eset)
+    metadata=pd %>% dplyr::select(starts_with("var_"))
+    var=c(colnames(metadata),"maineffect")
+    selectInput("color","Select an Attribute for the X-axis",var)
+  })
+  
+  output$color2 = renderUI({
+    results=fileload()
+    pd=pData(results$eset)
+    metadata=pd %>% dplyr::select(starts_with("var_"))
+    var=c(colnames(metadata),"maineffect")
+    selectInput("color2","Color By",var)
+  })
+  
+   #create user interface for dot-plot drop down menu
   output$minexprline = renderUI({ 
     tagList(
       checkboxInput("minexprline", label = "Show expression threshold line", value = FALSE),
@@ -2199,7 +2219,6 @@ server <- function(input, output,session) {
     gene=fd$ENSEMBL[fd$SYMBOL==input$genedeg]
     pd= pd %>% dplyr::select(-minexpr)
     exp=as.data.frame(results$eset@assayData$exprs)
-    exp=exp[rownames(exp)==gene,]
     exp=as.data.frame(t(exp))
     colnames(exp)=input$genedeg
     exp$sample_name=rownames(exp)

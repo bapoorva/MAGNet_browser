@@ -104,8 +104,8 @@ ui <- dashboardPage(
               fluidRow(
                 box(width = 8, status = "primary",solidHeader = TRUE,title = "Dot Plot of the gene of interest",
                     fluidRow(
-                      column(6,selectInput("color","Select an Attribute for the X-axis",c("tissue_source","etiology","gender","race","maineffect","Library.Pool"))),
-                      column(6,selectInput("color2","Color By",c("tissue_source","etiology","gender","race","maineffect","Library.Pool")))
+                      column(6,uiOutput("color")),
+                      column(6,uiOutput("color2"))
                     ),
                     uiOutput("minexprline"),
                     plotOutput('dotplot')
