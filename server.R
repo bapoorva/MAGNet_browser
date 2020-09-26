@@ -727,11 +727,11 @@ server <- function(input, output,session) {
   
   output$downloaddotplot <- downloadHandler(
     filename = function() {
-      paste0(input$projects, '_dotplot.jpg', sep='') 
+      paste0(input$projects, '_dotplot.pdf', sep='') 
       #paste0("dotplot.jpg")
     },
     content = function(file){
-      jpeg(file, quality = 100, width = 800, height = 800)
+      pdf(file, width = 11, height = 8,useDingbats = F )
       plot(dotplot_out())
       dev.off()
     })
