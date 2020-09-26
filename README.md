@@ -32,4 +32,4 @@ devtools::install_github("rstudio/d3heatmap")
 # Input Data format
 The data is analyzed using the [pipeline](https://github.com/mpmorley/MAGNet) and results are saved as an RData file which is read into the Shiny application as an input
 
-Note : Data to be mae available soon
+Note : Data to be made available soon
