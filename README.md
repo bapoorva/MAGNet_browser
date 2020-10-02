@@ -32,4 +32,10 @@ devtools::install_github("rstudio/d3heatmap")
 # Input Data format
 The data is analyzed using the [pipeline](https://github.com/mpmorley/MAGNet) and results are saved as an RData file which is read into the Shiny application as an input
 
-Note : Data to be made available soon
+# Data Download
+
+  * [Parameter file](https://www.dropbox.com/s/orie30ucpodo7bx/param.csv?dl=0)
+  * [Input RData File](https://www.dropbox.com/s/e3suuie3i2s2h9g/magnet.RData?dl=0)
+  * [Genotype Information](https://www.dropbox.com/s/j5o5pt4d8iumy89/MAGnet_example_subset.vcf.gz?dl=0)
+  
+     Note : The original VCF file with the genotype information for all 366 samples is too large. The file provided in the link above is a subset. Please note that      the index file has to be generated for the vcf file
